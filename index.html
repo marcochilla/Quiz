@@ -71,10 +71,7 @@
 <body>
   <h1>QUIZ</h1>
 
-  <div id="upload">
-    <label>Carica file Excel:</label><br/>
-    <input type="file" id="file" accept=".xlsx">
-  </div>
+ <div id="upload" style="display:none;"></div>
 
   <div id="start" style="display:none;">
     <label>Numero di domande: </label>
@@ -111,18 +108,21 @@
     let allQuestions = [], selectedQuestions = [], currentIndex = 0;
     let userAnswers = [], quizEnded = false;
 
-    document.getElementById('file').addEventListener('change', function(e) {
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: 'array' });
-        const sheet = workbook.Sheets[workbook.SheetNames[0]];
-        allQuestions = XLSX.utils.sheet_to_json(sheet);
-        document.getElementById('upload').style.display = 'none';
-        document.getElementById('start').style.display = 'block';
-      };
-      reader.readAsArrayBuffer(e.target.files[0]);
+    window.addEventListener("DOMContentLoaded", function () {
+  fetch('domande.xlsx')
+    .then(res => res.arrayBuffer())
+    .then(data => {
+      const workbook = XLSX.read(data, { type: 'array' });
+      const sheet = workbook.Sheets[workbook.SheetNames[0]];
+      allQuestions = XLSX.utils.sheet_to_json(sheet);
+      document.getElementById('upload').style.display = 'none';
+      document.getElementById('start').style.display = 'block';
+    })
+    .catch(err => {
+      alert("Errore nel caricamento del file Excel. Controlla che 'domande.xlsx' sia nel repository.");
+      console.error(err);
     });
+});
 
     function startQuiz() {
       const n = parseInt(document.getElementById('numQuestions').value);
